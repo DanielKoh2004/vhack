@@ -206,3 +206,80 @@ document.getElementById('toggle-sim').addEventListener('click', e => {
 });
 
 setInterval(processTxn, 1200);
+
+// ══════ PAGE SWITCHING ══════
+document.querySelectorAll('[data-page]').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        const pageId = link.dataset.page;
+
+        // Update nav
+        document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
+        link.parentElement.classList.add('active');
+
+        // Show target page, hide others
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(`page-${pageId}`).classList.add('active');
+    });
+});
+
+// ══════ INVESTIGATION FORM ══════
+document.getElementById('inv-submit').addEventListener('click', async () => {
+    const amt = parseFloat(document.getElementById('inv-amount').value) || 100;
+    const avg = parseFloat(document.getElementById('inv-avg').value) || 50;
+    const txn = {
+        transaction_id: `INV_${Date.now()}`,
+        name_sender: "C_INVESTIGATOR",
+        name_recipient: "C_TARGET",
+        transfer_type: document.getElementById('inv-type').value,
+        amount: amt,
+        avg_transaction_amount_30d: avg,
+        amount_vs_avg_ratio: +(amt / Math.max(avg, 1)).toFixed(2),
+        transaction_hour: parseInt(document.getElementById('inv-hour').value) || 12,
+        is_weekend: parseInt(document.getElementById('inv-weekend').value),
+        is_new_device: parseInt(document.getElementById('inv-device').value),
+        failed_login_attempts: parseInt(document.getElementById('inv-logins').value) || 0,
+        is_proxy_ip: parseInt(document.getElementById('inv-proxy').value),
+        ip_risk_score: parseFloat(document.getElementById('inv-ip').value) || 0,
+        sender_account_fully_drained: parseInt(document.getElementById('inv-drained').value),
+        account_age_days: parseInt(document.getElementById('inv-age').value) || 100,
+        tx_count_24h: parseInt(document.getElementById('inv-txcount').value) || 1,
+        country_mismatch: parseInt(document.getElementById('inv-country').value),
+        is_new_recipient: parseInt(document.getElementById('inv-newrecip').value),
+        established_user_new_recipient: 0
+    };
+
+    const resultDiv = document.getElementById('inv-result');
+    resultDiv.innerHTML = '<div class="empty-state">⏳ Scoring...</div>';
+
+    try {
+        const res = await fetch(`${API_URL}/score-transaction`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(txn) });
+        const d = await res.json();
+        const color = d.decision === 'APPROVE' ? '#10b981' : d.decision === 'FLAG' ? '#f59e0b' : '#ef4444';
+
+        resultDiv.innerHTML = `
+            <div class="inv-result-data">
+                <div class="inv-score-large" style="color:${color}">${d.risk_score.toFixed(4)}</div>
+                <div class="inv-decision-large" style="color:${color}">${d.decision}</div>
+                <div class="inv-layers">
+                    <div class="layer-bar-row"><span class="layer-label">LightGBM</span><div class="bar-track"><div class="bar-fill lgb" style="width:${d.layer_scores.lightgbm*100}%"></div></div><span class="bar-val">${d.layer_scores.lightgbm.toFixed(2)}</span></div>
+                    <div class="layer-bar-row"><span class="layer-label">IsoForest</span><div class="bar-track"><div class="bar-fill pyod" style="width:${d.layer_scores.isolation_forest*100}%"></div></div><span class="bar-val">${d.layer_scores.isolation_forest.toFixed(2)}</span></div>
+                    <div class="layer-bar-row"><span class="layer-label">Behavioral</span><div class="bar-track"><div class="bar-fill beh" style="width:${d.layer_scores.behavioral*100}%"></div></div><span class="bar-val">${d.layer_scores.behavioral.toFixed(2)}</span></div>
+                </div>
+                <h4 class="section-title" style="margin-top:8px">Risk Drivers</h4>
+                <ul class="reason-list">${d.reasons.map(r => `<li>${r}</li>`).join('')}</ul>
+                <div class="privacy-note">🔒 PII hashed · Latency: ${d.latency_ms.toFixed(1)}ms</div>
+            </div>
+        `;
+
+        // Log entry
+        const bc = d.decision.toLowerCase();
+        const logBody = document.getElementById('inv-log');
+        const tr = document.createElement('tr');
+        tr.className = 'flash-in';
+        tr.innerHTML = `<td>${new Date().toLocaleTimeString()}</td><td>$${amt.toFixed(2)}</td><td>${d.risk_score.toFixed(3)}</td><td><span class="badge ${bc}">${d.decision}</span></td><td style="font-family:Outfit;font-size:12px">${d.reasons[0] || '-'}</td>`;
+        logBody.insertBefore(tr, logBody.firstChild);
+    } catch (e) {
+        resultDiv.innerHTML = `<div class="empty-state" style="color:#f87171">❌ API unreachable: ${e.message}</div>`;
+    }
+});

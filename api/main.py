@@ -1,10 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from api.schemas import TransactionInput, RiskResponse, DashboardStats
 from api.risk_engine import RiskEngine
 import uvicorn
 import logging
 import asyncio
+import os
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -73,6 +76,17 @@ def get_dashboard_stats():
         avg_latency_ms=stats["latency_sum"] / total,
         fraud_rate_estimate=round(fraud_rate, 2)
     )
+
+# Serve the dashboard at /dashboard/
+dashboard_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'dashboard')
+if os.path.isdir(dashboard_dir):
+    app.mount("/dashboard", StaticFiles(directory=dashboard_dir, html=True), name="dashboard")
+
+@app.get("/")
+def root():
+    """Redirect to the dashboard."""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/dashboard/")
 
 if __name__ == "__main__":
     uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=True)
