@@ -1,0 +1,17 @@
+Ensemble AUC-PR: 1.0000
+Best Threshold: 0.6446
+Max F1: 0.9999
+
+Classification Report:
+              precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00    295500
+           1       1.00      1.00      1.00      4500
+
+    accuracy                           1.00    300000
+   macro avg       1.00      1.00      1.00    300000
+weighted avg       1.00      1.00      1.00    300000
+
+
+False Positive Rate: 0.00%
+Fraud Detection Rate: 99.96%

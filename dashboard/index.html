@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudShield AI – Real-Time Fraud Detection for the Unbanked</title>
+    <meta name="description" content="Digital Trust — AI-powered real-time fraud shield protecting ASEAN e-wallet users with a 3-layer ensemble and SHAP explainability.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="logo">
+                <div class="logo-icon">🛡️</div>
+                <h1>FraudShield<span>AI</span></h1>
+            </div>
+            <ul class="nav-links">
+                <li class="active"><a href="#"><span class="icon">📊</span> Live Monitor</a></li>
+                <li><a href="#"><span class="icon">🔍</span> Investigation</a></li>
+                <li><a href="#"><span class="icon">🧠</span> Model Insights</a></li>
+                <li><a href="#"><span class="icon">🔒</span> Privacy Center</a></li>
+            </ul>
+            <div class="sidebar-section">
+                <h4 class="sidebar-label">Ensemble Layers</h4>
+                <div class="layer-badge"><span class="dot lgb"></span> LightGBM (55%)</div>
+                <div class="layer-badge"><span class="dot pyod"></span> Isolation Forest (25%)</div>
+                <div class="layer-badge"><span class="dot beh"></span> Behavioral (20%)</div>
+            </div>
+            <div class="sdg-badge">
+                <div class="sdg-icon">🌐</div>
+                <div class="sdg-text">
+                    <span class="label">SDG 8.10</span>
+                    <span class="value">Financial Inclusion for All</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="page-title">
+                    <h2>Real-Time Transaction Monitor</h2>
+                    <p>Live scoring with 3-layer AI ensemble • Privacy-first design</p>
+                </div>
+                <div class="system-status">
+                    <div class="status-indicator live"></div>
+                    <span>Engine Live</span>
+                    <span class="sep">|</span>
+                    <span class="privacy-chip">🔒 PII Hashed</span>
+                </div>
+            </header>
+
+            <!-- KPIs -->
+            <section class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon blue">💵</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Scored</span>
+                        <span class="kpi-value" id="kpi-total">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon green">✅</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Approved</span>
+                        <span class="kpi-value" id="kpi-approved">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon yellow">⚠️</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Flagged</span>
+                        <span class="kpi-value" id="kpi-flagged">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon red">🚫</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Blocked</span>
+                        <span class="kpi-value" id="kpi-blocked">0</span>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon purple">⚡</div>
+                    <div class="kpi-info">
+                        <span class="kpi-label">Avg Latency</span>
+                        <span class="kpi-value"><span id="kpi-latency">0</span><small>ms</small></span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Grid -->
+            <div class="dashboard-layout">
+                <!-- Col 1: Feed -->
+                <div class="col-main">
+                    <div class="panel live-feed-panel">
+                        <div class="panel-header">
+                            <h3>🔴 Live Transaction Stream</h3>
+                            <button id="toggle-sim" class="btn-primary">⏸ Pause</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="transaction-table" id="txn-table">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Txn ID</th>
+                                        <th>Flow</th>
+                                        <th>Amount</th>
+                                        <th>Risk Score</th>
+                                        <th>Decision</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transaction-feed"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Col 2: Detail + Charts -->
+                <div class="col-side">
+                    <!-- Scoring Detail -->
+                    <div class="panel detail-panel" id="detail-panel">
+                        <div class="panel-header"><h3>Scoring Breakdown</h3></div>
+                        <div class="empty-state" id="detail-empty">Click any transaction to inspect its ensemble scoring.</div>
+                        <div class="detail-content hidden" id="detail-content">
+                            <!-- Risk Gauge -->
+                            <div class="gauge-wrapper">
+                                <svg class="gauge" viewBox="0 0 120 70" preserveAspectRatio="xMidYMid meet">
+                                    <defs>
+                                        <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%">
+                                            <stop offset="0%" style="stop-color:#10b981"/>
+                                            <stop offset="50%" style="stop-color:#f59e0b"/>
+                                            <stop offset="100%" style="stop-color:#ef4444"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8" stroke-linecap="round"/>
+                                    <path id="gauge-fill" d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="url(#gaugeGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="157"/>
+                                    <text id="gauge-score" x="60" y="55" text-anchor="middle" fill="white" font-size="18" font-weight="700" font-family="JetBrains Mono">0.000</text>
+                                    <text id="gauge-decision" x="60" y="68" text-anchor="middle" fill="#94a3b8" font-size="8" font-weight="600" font-family="Outfit" letter-spacing="2">APPROVE</text>
+                                </svg>
+                            </div>
+
+                            <!-- Layer Bars -->
+                            <h4 class="section-title">Ensemble Layers</h4>
+                            <div class="layer-bars">
+                                <div class="layer-bar-row">
+                                    <span class="layer-label">LightGBM (55%)</span>
+                                    <div class="bar-track"><div class="bar-fill lgb" id="bar-lgb" style="width:0%"></div></div>
+                                    <span class="bar-val" id="val-lgb">0.00</span>
+                                </div>
+                                <div class="layer-bar-row">
+                                    <span class="layer-label">IsoForest (25%)</span>
+                                    <div class="bar-track"><div class="bar-fill pyod" id="bar-pyod" style="width:0%"></div></div>
+                                    <span class="bar-val" id="val-pyod">0.00</span>
+                                </div>
+                                <div class="layer-bar-row">
+                                    <span class="layer-label">Behavioral (20%)</span>
+                                    <div class="bar-track"><div class="bar-fill beh" id="bar-beh" style="width:0%"></div></div>
+                                    <span class="bar-val" id="val-beh">0.00</span>
+                                </div>
+                            </div>
+
+                            <!-- Reasons -->
+                            <h4 class="section-title">Risk Drivers</h4>
+                            <ul class="reason-list" id="detail-reasons"></ul>
+
+                            <div class="privacy-note">🔒 PII hashed with SHA-256 before inference — no raw identities touch the model.</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="charts-row">
+                        <div class="panel chart-panel">
+                            <div class="panel-header"><h3>Decisions</h3></div>
+                            <div class="chart-container"><canvas id="decisionChart"></canvas></div>
+                        </div>
+                        <div class="panel chart-panel">
+                            <div class="panel-header"><h3>Risk by Hour</h3></div>
+                            <div class="chart-container"><canvas id="hourChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fraud Alerts Banner -->
+            <div class="alerts-strip" id="alerts-strip">
+                <div class="alerts-title">🚨 Recent Alerts</div>
+                <div class="alerts-scroll" id="alerts-scroll"></div>
+            </div>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
